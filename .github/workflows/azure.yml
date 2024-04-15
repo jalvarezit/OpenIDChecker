@@ -1,0 +1,39 @@
+name: OpenIDChecker Azure
+on:
+  workflow_dispatch:
+    inputs:
+      clientId:
+        description: 'App registration ID'
+        type: string
+        required: true
+      tenantId:
+        description: 'Tenant ID'
+        type: string
+        required: true
+      subscriptionId:
+        description: 'Subscription ID'
+        required: true
+        type: string
+
+# Required to get the ID Token that will be used for OIDC
+permissions:
+  id-token: write
+
+jobs:
+  build-images:
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: 'Az OIDC login'
+        uses: azure/login@v2
+        with:
+            client-id: ${{ inputs.clientId }}
+            tenant-id: ${{ inputs.tenantId }}
+            subscription-id: ${{ inputs.subscriptionId }}
+
+      - name: Check account
+        uses: azure/cli@v2
+        with:
+          azcliversion: 2.30.0
+          inlineScript: |
+            az account show

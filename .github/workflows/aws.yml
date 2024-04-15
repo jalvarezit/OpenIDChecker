@@ -1,0 +1,38 @@
+name: OpenIDChecker AWS
+on:
+  workflow_dispatch:
+    inputs:
+      audience:
+        description: 'OIDC audience'
+        type: string
+        default: sts.amazonaws.com
+        required: false
+      region:
+        description: 'AWS region'
+        type: string
+        required: true
+      role:
+        description: 'ARN of the role to be assumed'
+        type: string
+        required: true
+
+# Required to get the ID Token that will be used for OIDC
+permissions:
+  id-token: write
+
+jobs:
+  build-images:
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: AWS OIDC login
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: ${{ inputs.audience }}
+          aws-region: ${{ inputs.region }}
+          role-to-assume: ${{ inputs.role }}
+          role-session-name: OpenIDChecker
+
+      - name: Check account
+        run: |
+          aws list-profiles
